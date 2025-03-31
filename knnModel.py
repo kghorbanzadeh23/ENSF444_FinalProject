@@ -63,6 +63,7 @@ print(classification_report(y_test, y_pred, target_names=encoder.classes_))
 # Generate the confusion matrix
 cm = confusion_matrix(y_test, y_pred)
 
+# --- Confusion Matrix ---
 # Plot the confusion matrix using Seaborn
 plt.figure(figsize=(10, 8))
 sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=encoder.classes_, yticklabels=encoder.classes_)
@@ -70,4 +71,41 @@ plt.xlabel("Predicted")
 plt.ylabel("Actual")
 plt.title("Confusion Matrix - Optimized KNN")
 plt.tight_layout()
+plt.show()
+
+# --- Multi-Metric Elbow Method ---
+metrics = ['euclidean', 'manhattan', 'minkowski']
+k_values = list(range(1, 21))
+metric_scores = {}
+
+# Calculate cross-validation scores for each metric
+for metric in metrics:
+    scores = [cross_val_score(KNeighborsClassifier(n_neighbors=k, metric=metric), 
+                              X_train, y_train, cv=5).mean() for k in k_values]
+    metric_scores[metric] = scores
+
+# Plot the elbow graph for each metric with transparency and distinct markers
+plt.figure(figsize=(12, 8))
+
+# Marker styles for better differentiation
+markers = {'euclidean': 'o', 'manhattan': 's', 'minkowski': 'D'}
+
+for metric, scores in metric_scores.items():
+    plt.plot(k_values, scores, marker=markers[metric], label=f"{metric.capitalize()}", alpha=0.8)
+
+plt.xlabel("Number of Neighbors (k)")
+plt.ylabel("Cross-Validation Accuracy")
+plt.title("Elbow Method for Different Distance Metrics")
+plt.xticks(k_values)
+plt.grid(True)
+plt.legend()
+plt.show()
+
+# --- HeatMap ---
+# Display Classification Report Heatmap
+report_dict = classification_report(y_test, y_pred, target_names=encoder.classes_, output_dict=True)
+df_report = pd.DataFrame(report_dict).transpose()
+plt.figure(figsize=(8, 6))
+sns.heatmap(df_report.iloc[:-1, :-1], annot=True, cmap="Blues", fmt=".2f")
+plt.title("Classification Report Heatmap")
 plt.show()
