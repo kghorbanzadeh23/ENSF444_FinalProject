@@ -78,11 +78,18 @@ metrics = ['euclidean', 'manhattan', 'minkowski']
 k_values = list(range(1, 21))
 metric_scores = {}
 
+
 # Calculate cross-validation scores for each metric
 for metric in metrics:
     scores = [cross_val_score(KNeighborsClassifier(n_neighbors=k, metric=metric), 
                               X_train, y_train, cv=5).mean() for k in k_values]
     metric_scores[metric] = scores
+
+for metric in metrics:
+    scores = metric_scores[metric]
+    max_acc = max(scores)
+    best_k = k_values[scores.index(max_acc)]
+    print(f"Highest {metric.capitalize()} Accuracy: {max_acc:.4f} at k = {best_k}")
 
 # Plot the elbow graph for each metric with transparency and distinct markers
 plt.figure(figsize=(12, 8))
@@ -99,6 +106,16 @@ plt.title("Elbow Method for Different Distance Metrics")
 plt.xticks(k_values)
 plt.grid(True)
 plt.legend()
+plt.show()
+
+#Graph Euclidean
+plt.figure(figsize=(8, 6))
+plt.plot(k_values, metric_scores['euclidean'], marker='o', label="Euclidean", color='blue')
+plt.xlabel("k")
+plt.ylabel("Cross-Validation Accuracy")
+plt.title("Elbow Method for Euclidean Only")
+plt.legend()
+plt.grid(True)
 plt.show()
 
 # --- HeatMap ---
